@@ -12,42 +12,33 @@ namespace Snake
     {
         static void Main(string[] args)
         {
-            Console.WindowHeight = 16;
-            Console.WindowWidth = 32;
-            int screenWidth = Console.WindowWidth;
-            int screenHeight = Console.WindowHeight;
-            int score = 5;
             Random randomNumber = new Random();
+            ScreenArea screenArea = new ScreenArea(32, 16);
+            //Pixel Positions
+            PixelsCoordination snakePixelsCoordination = new PixelsCoordination(screenArea.ScreenWidth/2, screenArea.ScreenHeight/2, ConsoleColor.Red);
+            PixelsCoordination berryPosition = new PixelsCoordination(randomNumber.Next(0, screenArea.ScreenWidth),
+                randomNumber.Next(0, screenArea.ScreenHeight), ConsoleColor.Yellow);
+            int score = 5;
             bool gameOver = false;
-            Pixel snakePixel = new Pixel(screenWidth/2, screenHeight/2, ConsoleColor.Red);
             string movement = "RIGHT";
             List<int> xposlijf = new List<int>();
             List<int> yposlijf = new List<int>();
-            int berryx = randomNumber.Next(0, screenWidth);
-            int berryy = randomNumber.Next(0, screenHeight);
+
             DateTime tijd = DateTime.Now;
             DateTime tijd2 = DateTime.Now;
             string buttonpressed = "no";
             while (true)
             {
                 Console.Clear();
-                if (snakePixel.XPos == screenWidth-1 || snakePixel.XPos == 0 ||snakePixel.YPos == screenHeight-1 || snakePixel.YPos == 0)
-                { 
-                    gameOver = true;
-                }
-                GenerateScreenBorder(screenWidth,screenHeight);
+                gameOver = CheckSnakeOutOfBounds(snakePixelsCoordination, screenArea);
+                GenerateScreenBorder(screenArea);
                 Console.ForegroundColor = ConsoleColor.Green;
-                if (berryx == snakePixel.XPos && berryy == snakePixel.YPos)
-                {
-                    score++;
-                    berryx = randomNumber.Next(1, screenWidth-2);
-                    berryy = randomNumber.Next(1, screenHeight-2);
-                } 
+                score += CheckIfBerryWasPickedUp(snakePixelsCoordination, berryPosition, screenArea);
                 for (int i = 0; i < xposlijf.Count(); i++)
                 {
                     Console.SetCursorPosition(xposlijf[i], yposlijf[i]);
                     Console.Write("■");
-                    if (xposlijf[i] == snakePixel.XPos && yposlijf[i] == snakePixel.YPos)
+                    if (xposlijf[i] == snakePixelsCoordination.XPosition && yposlijf[i] == snakePixelsCoordination.YPosition)
                     {
                         gameOver = true;
                     }
@@ -56,10 +47,10 @@ namespace Snake
                 {
                     break;
                 }
-                Console.SetCursorPosition(snakePixel.XPos, snakePixel.YPos);
-                Console.ForegroundColor = snakePixel.GameConsoleColor;
+                Console.SetCursorPosition(snakePixelsCoordination.XPosition, snakePixelsCoordination.YPosition);
+                Console.ForegroundColor = snakePixelsCoordination.GameConsoleColor;
                 Console.Write("■");
-                Console.SetCursorPosition(berryx, berryy);
+                Console.SetCursorPosition(berryPosition.XPosition, berryPosition.YPosition);
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.Write("■");
                 tijd = DateTime.Now;
@@ -94,21 +85,21 @@ namespace Snake
                         }
                     }
                 }
-                xposlijf.Add(snakePixel.XPos);
-                yposlijf.Add(snakePixel.YPos);
+                xposlijf.Add(snakePixelsCoordination.XPosition);
+                yposlijf.Add(snakePixelsCoordination.YPosition);
                 switch (movement)
                 {
                     case "UP":
-                        snakePixel.YPos--;
+                        snakePixelsCoordination.YPosition--;
                         break;
                     case "DOWN":
-                        snakePixel.YPos++;
+                        snakePixelsCoordination.YPosition++;
                         break;
                     case "LEFT":
-                        snakePixel.XPos--;
+                        snakePixelsCoordination.XPosition--;
                         break;
                     case "RIGHT":
-                        snakePixel.XPos++;
+                        snakePixelsCoordination.XPosition++;
                         break;
                 }
                 if (xposlijf.Count() > score)
@@ -117,49 +108,87 @@ namespace Snake
                     yposlijf.RemoveAt(0);
                 }
             }
-            Console.SetCursorPosition(screenWidth / 5, screenHeight / 2);
+            Console.SetCursorPosition(screenArea.ScreenWidth / 5, screenArea.ScreenHeight / 2);
             Console.WriteLine("Game over, Score: "+ score);
-            Console.SetCursorPosition(screenWidth / 5, screenHeight / 2 +1);
+            Console.SetCursorPosition(screenArea.ScreenWidth / 5, screenArea.ScreenHeight / 2 +1);
         }
 
-        static void GenerateScreenBorder(int screenWidth, int screenHeight)
+        private static int CheckIfBerryWasPickedUp(PixelsCoordination berryPosition, PixelsCoordination snakePixelsCoordination,ScreenArea screenArea)
         {
-            for (int i = 0; i < screenWidth; i++)
+            Random randomNumber = new Random();
+            if (berryPosition.XPosition == snakePixelsCoordination.XPosition && berryPosition.YPosition == snakePixelsCoordination.YPosition)
+            {
+                berryPosition.XPosition = randomNumber.Next(1, screenArea.ScreenWidth-2);
+                berryPosition.YPosition = randomNumber.Next(1, screenArea.ScreenHeight-2);
+                return 1;
+            }
+
+            return 0;
+        }
+
+        static void GenerateScreenBorder(ScreenArea screenArea)
+        {
+            for (int i = 0; i < screenArea.ScreenWidth; i++)
             {
                 Console.SetCursorPosition (i, 0);
+                Console.Write("■");
+
+                Console.SetCursorPosition (i, screenArea.ScreenHeight - 1);
                 Console.Write ("■");
             }
 
-            for (int i = 0; i < screenWidth; i++)
-            {
-                Console.SetCursorPosition (i, screenHeight - 1);
-                Console.Write ("■");
-            }
-
-            for (int i = 0; i < screenWidth; i++)
+            for (int i = 0; i < screenArea.ScreenHeight; i++)
             {
                 Console.SetCursorPosition (0, i);
                 Console.Write ("■");
-            }
-            for (int i = 0; i < screenHeight; i++)
-            {
-                Console.SetCursorPosition (screenWidth - 1, i);
+
+                Console.SetCursorPosition (screenArea.ScreenWidth - 1, i);
                 Console.Write ("■");
             }
         }
 
-        class Pixel
+        static bool CheckSnakeOutOfBounds(PixelsCoordination currentSnakePosition, ScreenArea screenArea)
         {
-            public Pixel(int xPos, int yPos, ConsoleColor color)
+            if (currentSnakePosition.XPosition == screenArea.ScreenWidth-1 || currentSnakePosition.XPosition == 0 ||currentSnakePosition.YPosition == screenArea.ScreenWidth-1 || currentSnakePosition.YPosition == 0)
+            { 
+                return true;
+            }
+
+            return false;
+        }
+
+        class PixelsCoordination
+        {
+            public PixelsCoordination(int xPosition, int yPosition, ConsoleColor color)
             {
-                XPos = xPos;
-                YPos = yPos;
+                XPosition = xPosition;
+                YPosition = yPosition;
                 GameConsoleColor = color;
             }
 
-            public int XPos { get; set; }
-            public int YPos { get; set; }
+            public int XPosition { get; set; }
+            public int YPosition { get; set; }
             public ConsoleColor GameConsoleColor { get; set; }
+        }
+
+        class ScreenArea
+        {
+            public ScreenArea(int screenWidth, int screenHeight)
+            {
+                ScreenWidth = screenWidth;
+                ScreenHeight = screenHeight;
+                SetScreenWidth(ScreenWidth,ScreenHeight);
+            }
+
+            public int ScreenWidth { get; private set; }
+            public int ScreenHeight { get; private set; }
+            
+            //functions
+            private static void SetScreenWidth(int screenWidth, int screenHeight)
+            {
+                Console.WindowWidth = screenWidth;
+                Console.WindowHeight = screenHeight;
+            }
         }
     }
 }

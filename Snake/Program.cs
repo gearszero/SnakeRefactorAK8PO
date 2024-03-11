@@ -47,7 +47,7 @@ class Program
             }
 
             var gameOver = CheckSnakeOutOfBounds(snakeHead, screenArea) ||
-                           CheckSnakeSelfCollision(snakeBody, snakeHead);
+                           CheckSnakeSelfCollisionAndGenerateBody(snakeBody, snakeHead);
             if (gameOver)
             {
                 break;
@@ -100,7 +100,7 @@ class Program
         return false;
     }
 
-    private static bool CheckSnakeSelfCollision(List<PixelsCoordination> snakeBody, PixelsCoordination snakeHead)
+    private static bool CheckSnakeSelfCollisionAndGenerateBody(List<PixelsCoordination> snakeBody, PixelsCoordination snakeHead)
     {
         bool headCollide = false;
         for (int bodyPixel = 0; bodyPixel < snakeBody.Count(); ++bodyPixel)

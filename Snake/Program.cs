@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Threading;
-
+﻿using System.Diagnostics;
 ///█ ■
 ////https://www.youtube.com/watch?v=SGZgvMwjq2U
 namespace Snake;
@@ -22,15 +15,15 @@ class Program
 {
     static void Main(string[] args)
     {
-        Random randomNumber = new Random();
-        ScreenArea screenArea = new ScreenArea(32, 16);
+        var randomNumber = new Random();
+        var screenArea = new ScreenArea(32, 16);
 
         //Pixel Positions
-        PixelsCoordination snakeHead = new PixelsCoordination(screenArea.ScreenWidth / 2,
+        var snakeHeadPosition = new PixelsCoordination(screenArea.ScreenWidth / 2,
             screenArea.ScreenHeight / 2, ConsoleColor.Red);
-        PixelsCoordination berryPosition = new PixelsCoordination(randomNumber.Next(0, screenArea.ScreenWidth),
+        var berryPosition = new PixelsCoordination(randomNumber.Next(0, screenArea.ScreenWidth),
             randomNumber.Next(0, screenArea.ScreenHeight), ConsoleColor.Yellow);
-        List<PixelsCoordination> snakeBody = new List<PixelsCoordination>();
+        var snakeBodyPosition = new List<PixelsCoordination>();
 
         Direction currentDirection = Direction.Right;
         int gameScore = 5;
@@ -40,35 +33,35 @@ class Program
         {
             Console.Clear();
             GenerateScreenBorder(screenArea);
-            if (CheckIfBerryWasPickedUp(berryPosition, snakeHead))
+            if (CheckIfBerryWasPickedUp(berryPosition, snakeHeadPosition))
             {
-                berryPosition = GenerateNewBerryPosition(berryPosition, screenArea);
+                berryPosition = GenerateNewBerryPosition(screenArea);
                 ++gameScore;
             }
 
-            var gameOver = CheckSnakeOutOfBounds(snakeHead, screenArea) ||
-                           CheckSnakeSelfCollisionAndGenerateBody(snakeBody, snakeHead);
+            var gameOver = CheckSnakeOutOfBounds(snakeHeadPosition, screenArea) ||
+                           CheckSnakeSelfCollisionAndGenerateBody(snakeBodyPosition, snakeHeadPosition);
             if (gameOver)
             {
                 break;
             }
 
-            DrawPixel(snakeHead);
+            DrawPixel(snakeHeadPosition);
             DrawPixel(berryPosition);
 
             var stopWatch = Stopwatch.StartNew();
-            while (stopWatch.ElapsedMilliseconds <= 500)
+            while (stopWatch.ElapsedMilliseconds <= 200)
             {
                 currentDirection = KeyInputChangeDirection(currentDirection);
             }
 
-            snakeBody.Add(new PixelsCoordination(snakeHead.XPosition, snakeHead.YPosition, ConsoleColor.Green));
+            snakeBodyPosition.Add(new PixelsCoordination(snakeHeadPosition.XPosition, snakeHeadPosition.YPosition, ConsoleColor.Green));
 
-            ChangeDirectionOfSnake(snakeHead, currentDirection);
+            ChangeDirectionOfSnake(snakeHeadPosition, currentDirection);
 
-            if (snakeBody.Count() > gameScore)
+            if (snakeBodyPosition.Count() > gameScore)
             {
-                snakeBody.RemoveAt(0);
+                snakeBodyPosition.RemoveAt(0);
             }
         }
 
@@ -113,10 +106,10 @@ class Program
         return headCollide;
     }
 
-    private static PixelsCoordination GenerateNewBerryPosition(PixelsCoordination berryPosition, ScreenArea screenArea)
+    private static PixelsCoordination GenerateNewBerryPosition(ScreenArea screenArea)
     {
-        Random randomNumber = new Random();
-        berryPosition = new PixelsCoordination(randomNumber.Next(2, screenArea.ScreenWidth - 2),
+        var randomNumber = new Random();
+        var berryPosition = new PixelsCoordination(randomNumber.Next(2, screenArea.ScreenWidth - 2),
             randomNumber.Next(2, screenArea.ScreenHeight - 2), ConsoleColor.Yellow);
         DrawPixel(berryPosition);
         return berryPosition;
@@ -124,7 +117,7 @@ class Program
 
     private static void GenerateScreenBorder(ScreenArea screenArea)
     {
-        PixelsCoordination borderCoordination = new PixelsCoordination(0, 0, ConsoleColor.Cyan);
+        var borderCoordination = new PixelsCoordination(0, 0, ConsoleColor.Cyan);
         for (int currentPosition = 0; currentPosition < screenArea.ScreenWidth; currentPosition++)
         {
             DrawPixel(borderCoordination.ChangePixelsPosition(currentPosition, 0));
@@ -201,7 +194,7 @@ class Program
         }
     }
 
-    class PixelsCoordination
+    private class PixelsCoordination
     {
         public PixelsCoordination(int xPosition, int yPosition, ConsoleColor color)
         {
@@ -219,15 +212,9 @@ class Program
         {
             return new PixelsCoordination(newPositionX, newPositionY, this.PixelColor);
         }
-
-        public void ChangePixelLocation(int newLocationX, int newLocationY)
-        {
-            XPosition = newLocationX;
-            YPosition = newLocationY;
-        }
     }
 
-    class ScreenArea
+    private class ScreenArea
     {
         public ScreenArea(int screenWidth, int screenHeight)
         {

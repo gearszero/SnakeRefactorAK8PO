@@ -11,7 +11,7 @@ public enum Direction
     Right
 }
 
-class Program
+static class Program
 {
     static void Main(string[] args)
     {
@@ -25,8 +25,8 @@ class Program
             randomNumber.Next(0, screenArea.ScreenHeight), ConsoleColor.Yellow);
         var snakeBodyPosition = new List<PixelsCoordination>();
 
-        Direction currentDirection = Direction.Right;
-        int gameScore = 5;
+        var currentDirection = Direction.Right;
+        var gameScore = 5;
 
 
         while (true)
